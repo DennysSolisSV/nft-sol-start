@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import twitterLogo from './assets/twitter-logo.svg';
 
-import { buildQuery, arweave } from './lib/api';
+import buildQuery from 'arweave';
+import {  arweave } from './lib/api';
 
 // Constants
 const TWITTER_HANDLE = '_buildspace';
@@ -15,16 +16,34 @@ const App = () => {
   //   ARWEAVE
 
   const getPostInfos = async() => {
-    const query = buildQuery();
-    const results = await arweave.api.post('/graphql', query)
-      .catch(err => {
-        console.error('GraphQL query failed');
-         throw new Error(err);
-      });
-    const edges = results.data.data.transactions.edges;
-    console.log(edges);
-    return [];
-   }
+    arweave.network.getInfo().then(console.log);
+
+    let key = await arweave.wallets.generate();
+    console.log(key);
+
+
+    let transaction = await arweave.createTransaction({
+        data: 'hola mundo ',
+    }, key);
+
+    transaction.addTag('Content-Type', 'text/plain');
+    transaction.addTag('key2', walletAddress);
+
+    console.log(transaction);
+
+   
+
+      await arweave.transactions.sign(transaction, key);
+
+      const response = await arweave.transactions.post(transaction);
+
+      console.log(response.status);
+       
+  }
+
+
+  
+   
 
   // ARWEAVE
 
@@ -46,8 +65,6 @@ const App = () => {
            * Set the user's publicKey in state to be used later!
            */
           setWalletAddress(response.publicKey.toString());
-
-          getPostInfos();
         }
       } else {
         alert('Solana object not found! Get a Phantom Wallet 👻');
@@ -78,7 +95,8 @@ const App = () => {
 
   useEffect(() => {
     const onLoad = async () => {
-      await checkIfWalletIsConnected();
+      // await checkIfWalletIsConnected();
+      await getPostInfos();
     };
     window.addEventListener('load', onLoad);
     return () => window.removeEventListener('load', onLoad);
