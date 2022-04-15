@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import twitterLogo from './assets/twitter-logo.svg';
 
+import { buildQuery, arweave } from './lib/api';
+
 // Constants
 const TWITTER_HANDLE = '_buildspace';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
@@ -9,6 +11,22 @@ const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 const App = () => {
   // State
   const [walletAddress, setWalletAddress] = useState(null);
+
+  //   ARWEAVE
+
+  const getPostInfos = async() => {
+    const query = buildQuery();
+    const results = await arweave.api.post('/graphql', query)
+      .catch(err => {
+        console.error('GraphQL query failed');
+         throw new Error(err);
+      });
+    const edges = results.data.data.transactions.edges;
+    console.log(edges);
+    return [];
+   }
+
+  // ARWEAVE
 
   // Actions
   const checkIfWalletIsConnected = async () => {
@@ -28,6 +46,8 @@ const App = () => {
            * Set the user's publicKey in state to be used later!
            */
           setWalletAddress(response.publicKey.toString());
+
+          getPostInfos();
         }
       } else {
         alert('Solana object not found! Get a Phantom Wallet 👻');
