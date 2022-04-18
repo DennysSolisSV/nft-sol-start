@@ -25,22 +25,47 @@ const App = () => {
     const testWeave = await TestWeave.init(arweave);
     arweave.network.getInfo().then(console.log);
 
-    let transaction = await arweave.createTransaction({
-        data: 'hola mundo ',
-    }, testWeave.rootJWK);
+    const data = `hola`
+      const transaction = await arweave.createTransaction({
+        data,
+      }, testWeave.rootJWK)
 
-    transaction.addTag('Content-Type', 'text/plain');
-    transaction.addTag('key2', walletAddress);
+      transaction.addTag('Content-Type', 'text/plain');
+      transaction.addTag('key', 'sabado');
 
-    console.log(transaction.id);
+      await arweave.transactions.sign(transaction, testWeave.rootJWK)
+      const statusBeforePost = await arweave.transactions.getStatus(transaction.id)
+      console.log(statusBeforePost); // this will return 404
+      await arweave.transactions.post(transaction)
+      const statusAfterPost = await arweave.transactions.getStatus(transaction.id)
+      console.log(statusAfterPost); // this will return 202
 
-   
+      await testWeave.mine();
+      const statusAfterMine = await arweave.transactions.getStatus(transaction.id)
+      console.log(statusAfterMine); // this will return 200
 
-      await arweave.transactions.sign(transaction, testWeave.rootJWK);
+      
+      const transaction2 = arweave.transactions.search('secret', 'interesante')
+      console.log(transaction2)
 
-      const response = await arweave.transactions.post(transaction);
+      // transaction2.get('tags').forEach(tag => {
+      //       let key = tag.get('name', {decode: true, string: true});
+      //       let value = tag.get('value', {decode: true, string: true});
+      //       console.log(`${key} : ${value}`);
+      //     });
+      
+      // .then(transaction => {
 
-      console.log(response);
+      //   transaction2.get('tags').forEach(tag => {
+      //     let key = tag.get('name', {decode: true, string: true});
+      //     let value = tag.get('value', {decode: true, string: true});
+      //     console.log(`${key} : ${value}`);
+      //   });
+      //   // Content-Type : text/html
+      //   // User-Agent : ArweaveDeploy/1.1.0
+      // });
+
+
 
       // arweave.transactions.getData('JlvUMJ0aKWP71FxDP2zjt4Y2Ol7aEVqSfpSVk4hx9-g', {decode: true, string: true}).then(data => {
       //   console.log(data);
