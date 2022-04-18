@@ -2,42 +2,50 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import twitterLogo from './assets/twitter-logo.svg';
 
-import buildQuery from 'arweave';
+// import buildQuery from 'arweave';
 import {  arweave } from './lib/api';
+
+import TestWeave from 'testweave-sdk';
 
 // Constants
 const TWITTER_HANDLE = '_buildspace';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
+
+
+
 
 const App = () => {
   // State
   const [walletAddress, setWalletAddress] = useState(null);
 
   //   ARWEAVE
+  
 
   const getPostInfos = async() => {
+    const testWeave = await TestWeave.init(arweave);
     arweave.network.getInfo().then(console.log);
-
-    let key = await arweave.wallets.generate();
-    console.log(key);
-
 
     let transaction = await arweave.createTransaction({
         data: 'hola mundo ',
-    }, key);
+    }, testWeave.rootJWK);
 
     transaction.addTag('Content-Type', 'text/plain');
     transaction.addTag('key2', walletAddress);
 
-    console.log(transaction);
+    console.log(transaction.id);
 
    
 
-      await arweave.transactions.sign(transaction, key);
+      await arweave.transactions.sign(transaction, testWeave.rootJWK);
 
       const response = await arweave.transactions.post(transaction);
 
-      console.log(response.status);
+      console.log(response);
+
+      // arweave.transactions.getData('JlvUMJ0aKWP71FxDP2zjt4Y2Ol7aEVqSfpSVk4hx9-g', {decode: true, string: true}).then(data => {
+      //   console.log(data);
+      //   // <!DOCTYPE HTML>...
+      // });
        
   }
 
